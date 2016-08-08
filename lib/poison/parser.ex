@@ -227,9 +227,11 @@ defmodule Poison.Parser do
 
   defp string_escape(<<?u, seq :: binary-size(4)>> <> rest, acc) do
     string_continue(rest, [acc, <<String.to_integer(seq, 16) :: utf8>> ])
+  rescue
+    ArgumentError -> string_continue(rest, [acc, ""])
   end
 
-  defp string_escape(other, _), do: syntax_error(other)
+  defp string_escape(_other, acc), do: acc
 
   defp string_chunk_size("\"" <> _, acc), do: acc
   defp string_chunk_size("\\" <> _, acc), do: acc
