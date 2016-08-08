@@ -2,10 +2,10 @@ defmodule ParserBench do
   use Benchfella
 
   # We wont test Jazz, since it's parser is simply an earlier version of
-  # Poison's parser.
+  # SafePoison's parser.
 
-  bench "Poison", [json: gen_json] do
-    Poison.Parser.parse!(json)
+  bench "SafePoison", [json: gen_json] do
+    SafePoison.Parser.parse!(json)
   end
 
   bench "jiffy", [json: gen_json] do
@@ -17,8 +17,8 @@ defmodule ParserBench do
   end
 
   # UTF8 escaping
-  bench "UTF-8 unescaping (Poison)", [utf8: gen_utf8] do
-    Poison.Parser.parse!(utf8)
+  bench "UTF-8 unescaping (SafePoison)", [utf8: gen_utf8] do
+    SafePoison.Parser.parse!(utf8)
   end
 
   bench "UTF-8 unescaping (jiffy)", [utf8: gen_utf8] do
@@ -35,6 +35,6 @@ defmodule ParserBench do
 
   defp gen_utf8 do
     text = File.read!(Path.expand("data/UTF-8-demo.txt", __DIR__))
-    Poison.encode!(text) |> IO.iodata_to_binary
+    SafePoison.encode!(text) |> IO.iodata_to_binary
   end
 end

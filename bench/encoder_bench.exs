@@ -2,8 +2,8 @@ defmodule EncoderBench do
   use Benchfella
 
   # Lists
-  bench "lists (Poison)", [list: gen_list] do
-    Poison.encode!(list)
+  bench "lists (SafePoison)", [list: gen_list] do
+    SafePoison.encode!(list)
   end
 
   bench "lists (jiffy)", [list: gen_list] do
@@ -19,8 +19,8 @@ defmodule EncoderBench do
   end
 
   # Maps
-  bench "maps (Poison)", [map: gen_map] do
-    Poison.encode!(map)
+  bench "maps (SafePoison)", [map: gen_map] do
+    SafePoison.encode!(map)
   end
 
   bench "maps (jiffy)", [map: gen_map] do
@@ -36,8 +36,8 @@ defmodule EncoderBench do
   end
 
   # Strings
-  bench "strings (Poison)", [string: gen_string] do
-    Poison.encode!(string)
+  bench "strings (SafePoison)", [string: gen_string] do
+    SafePoison.encode!(string)
   end
 
   bench "strings (jiffy)", [string: gen_string] do
@@ -53,8 +53,8 @@ defmodule EncoderBench do
   end
 
   # String escaping
-  bench "string escaping (Poison)", [string: gen_string] do
-    Poison.encode!(string, escape: :unicode)
+  bench "string escaping (SafePoison)", [string: gen_string] do
+    SafePoison.encode!(string, escape: :unicode)
   end
 
   bench "string escaping (jiffy)", [string: gen_string] do
@@ -70,8 +70,8 @@ defmodule EncoderBench do
   end
 
   # Structs
-  bench "structs (Poison)", [structs: gen_structs] do
-    Poison.encode!(structs)
+  bench "structs (SafePoison)", [structs: gen_structs] do
+    SafePoison.encode!(structs)
   end
 
   bench "structs (JSX)", [structs: gen_structs] do
@@ -82,8 +82,8 @@ defmodule EncoderBench do
     Jazz.encode!(structs)
   end
 
-  bench "Poison", [data: gen_data] do
-    Poison.encode!(data)
+  bench "SafePoison", [data: gen_data] do
+    SafePoison.encode!(data)
   end
 
   bench "jiffy", [data: gen_data] do
@@ -98,8 +98,8 @@ defmodule EncoderBench do
     Jazz.encode!(data)
   end
 
-  bench "Poison (pretty)", [data: gen_data] do
-    Poison.encode!(data, pretty: true)
+  bench "SafePoison (pretty)", [data: gen_data] do
+    SafePoison.encode!(data, pretty: true)
   end
 
   bench "jiffy (pretty)", [data: gen_data] do
@@ -127,7 +127,7 @@ defmodule EncoderBench do
   end
 
   defmodule Struct do
-    @derive [Poison.Encoder]
+    @derive [SafePoison.Encoder]
     defstruct x: nil
   end
 
@@ -136,6 +136,6 @@ defmodule EncoderBench do
   end
 
   defp gen_data do
-    Path.expand("data/generated.json", __DIR__) |> File.read! |> Poison.decode!
+    Path.expand("data/generated.json", __DIR__) |> File.read! |> SafePoison.decode!
   end
 end

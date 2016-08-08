@@ -1,7 +1,7 @@
-defmodule Poison.EncoderTest do
+defmodule SafePoison.EncoderTest do
   use ExUnit.Case, async: true
 
-  alias Poison.EncodeError
+  alias SafePoison.EncodeError
 
   test "Atom" do
     assert to_json(nil) == "null"
@@ -168,17 +168,17 @@ defmodule Poison.EncoderTest do
   end
 
   defmodule Derived do
-    @derive [Poison.Encoder]
+    @derive [SafePoison.Encoder]
     defstruct name: ""
   end
 
   defmodule DerivedUsingOnly do
-    @derive {Poison.Encoder, only: [:name]}
+    @derive {SafePoison.Encoder, only: [:name]}
     defstruct name: "", size: 0
   end
 
   defmodule DerivedUsingExcept do
-    @derive {Poison.Encoder, except: [:name]}
+    @derive {SafePoison.Encoder, except: [:name]}
     defstruct name: "", size: 0
   end
 
@@ -189,14 +189,14 @@ defmodule Poison.EncoderTest do
   test "@derive" do
     derived = %Derived{name: "derived"}
     non_derived = %NonDerived{name: "non-derived"}
-    assert Poison.Encoder.impl_for!(derived) == Poison.Encoder.Poison.EncoderTest.Derived
-    assert Poison.Encoder.impl_for!(non_derived) == Poison.Encoder.Any
+    assert SafePoison.Encoder.impl_for!(derived) == SafePoison.Encoder.SafePoison.EncoderTest.Derived
+    assert SafePoison.Encoder.impl_for!(non_derived) == SafePoison.Encoder.Any
 
     derived_using_only = %DerivedUsingOnly{name: "derived using :only", size: 10}
-    assert Poison.decode!(to_json(derived_using_only)) == %{"name" => "derived using :only"}
+    assert SafePoison.decode!(to_json(derived_using_only)) == %{"name" => "derived using :only"}
 
     derived_using_except = %DerivedUsingExcept{name: "derived using :except", size: 10}
-    assert Poison.decode!(to_json(derived_using_except)) == %{"size" => 10}
+    assert SafePoison.decode!(to_json(derived_using_except)) == %{"size" => 10}
   end
 
   test "EncodeError" do
@@ -214,6 +214,6 @@ defmodule Poison.EncoderTest do
   end
 
   defp to_json(value, options \\ []) do
-    Poison.Encoder.encode(value, options) |> IO.iodata_to_binary
+    SafePoison.Encoder.encode(value, options) |> IO.iodata_to_binary
   end
 end

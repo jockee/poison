@@ -1,10 +1,10 @@
-defmodule Poison.Mixfile do
+defmodule SafePoison.Mixfile do
   use Mix.Project
 
   @version File.read!("VERSION") |> String.strip
 
   def project do
-    [app: :poison,
+    [app: :safe_poison,
      version: @version,
      elixir: "~> 1.1",
      description: "An incredibly fast, pure Elixir JSON library",
@@ -40,8 +40,6 @@ defmodule Poison.Mixfile do
 
   defp package do
     [files: ~w(lib mix.exs README.md LICENSE UNLICENSE VERSION),
-     maintainers: ["Devin Torres"],
-     licenses: ["Unlicense"],
-     links: %{"GitHub" => "https://github.com/devinus/poison"}]
+     links: %{"GitHub" => "https://github.com/jockee/safe_poison"}]
   end
 end

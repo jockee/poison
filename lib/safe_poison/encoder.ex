@@ -1,4 +1,4 @@
-defmodule Poison.EncodeError do
+defmodule SafePoison.EncodeError do
   defexception value: nil, message: nil
 
   def message(%{value: value, message: nil}) do
@@ -10,7 +10,7 @@ defmodule Poison.EncodeError do
   end
 end
 
-defmodule Poison.Encode do
+defmodule SafePoison.Encode do
   defmacro __using__(_) do
     quote do
       defp encode_name(value) do
@@ -20,7 +20,7 @@ defmodule Poison.Encode do
           is_atom(value) ->
             Atom.to_string(value)
           true ->
-            raise Poison.EncodeError, value: value,
+            raise SafePoison.EncodeError, value: value,
               message: "expected string or atom key, got: #{inspect value}"
         end
       end
@@ -28,7 +28,7 @@ defmodule Poison.Encode do
   end
 end
 
-defmodule Poison.Pretty do
+defmodule SafePoison.Pretty do
   defmacro __using__(_) do
     quote do
       @default_indent 2
@@ -59,23 +59,23 @@ defmodule Poison.Pretty do
   end
 end
 
-defprotocol Poison.Encoder do
+defprotocol SafePoison.Encoder do
   @fallback_to_any true
 
   def encode(value, options)
 end
 
-defimpl Poison.Encoder, for: Atom do
+defimpl SafePoison.Encoder, for: Atom do
   def encode(nil, _),   do: "null"
   def encode(true, _),  do: "true"
   def encode(false, _), do: "false"
 
   def encode(atom, options) do
-    Poison.Encoder.BitString.encode(Atom.to_string(atom), options)
+    SafePoison.Encoder.BitString.encode(Atom.to_string(atom), options)
   end
 end
 
-defimpl Poison.Encoder, for: BitString do
+defimpl SafePoison.Encoder, for: BitString do
   use Bitwise
 
   def encode("", _), do: "\"\""
@@ -151,7 +151,7 @@ defimpl Poison.Encoder, for: BitString do
   end
 
   defp chunk_size(<<char>>, _, _) do
-    raise Poison.EncodeError, value: <<char>>
+    raise SafePoison.EncodeError, value: <<char>>
   end
 
   defp chunk_size("", _, acc), do: acc
@@ -167,29 +167,29 @@ defimpl Poison.Encoder, for: BitString do
   end
 end
 
-defimpl Poison.Encoder, for: Integer do
+defimpl SafePoison.Encoder, for: Integer do
   def encode(integer, _options) do
     Integer.to_string(integer)
   end
 end
 
-defimpl Poison.Encoder, for: Float do
+defimpl SafePoison.Encoder, for: Float do
   def encode(float, _options) do
     :io_lib_format.fwrite_g(float)
   end
 end
 
-defimpl Poison.Encoder, for: Map do
-  alias Poison.Encoder
+defimpl SafePoison.Encoder, for: Map do
+  alias SafePoison.Encoder
 
   @compile :inline_list_funcs
 
-  use Poison.Pretty
-  use Poison.Encode
+  use SafePoison.Pretty
+  use SafePoison.Encode
 
   # TODO: Remove once we require Elixir 1.1+
   defmacro __deriving__(module, struct, options) do
-    Poison.Encoder.Any.deriving(module, struct, options)
+    SafePoison.Encoder.Any.deriving(module, struct, options)
   end
 
   def encode(map, _) when map_size(map) < 1, do: "{}"
@@ -215,10 +215,10 @@ defimpl Poison.Encoder, for: Map do
   end
 end
 
-defimpl Poison.Encoder, for: List do
-  alias Poison.Encoder
+defimpl SafePoison.Encoder, for: List do
+  alias SafePoison.Encoder
 
-  use Poison.Pretty
+  use SafePoison.Pretty
 
   @compile :inline_list_funcs
 
@@ -243,15 +243,15 @@ defimpl Poison.Encoder, for: List do
   end
 end
 
-defimpl Poison.Encoder, for: [Range, Stream, MapSet, HashSet] do
-  use Poison.Pretty
+defimpl SafePoison.Encoder, for: [Range, Stream, MapSet, HashSet] do
+  use SafePoison.Pretty
 
   def encode(collection, options) do
     encode(collection, pretty(options), options)
   end
 
   def encode(collection, false, options) do
-    fun = &[?,, Poison.Encoder.encode(&1, options)]
+    fun = &[?,, SafePoison.Encoder.encode(&1, options)]
 
     case Enum.flat_map(collection, fun) do
       [] -> "[]"
@@ -264,7 +264,7 @@ defimpl Poison.Encoder, for: [Range, Stream, MapSet, HashSet] do
     offset = offset(options) + indent
     options = offset(options, offset)
 
-    fun = &[",\n", spaces(offset), Poison.Encoder.encode(&1, options)]
+    fun = &[",\n", spaces(offset), SafePoison.Encoder.encode(&1, options)]
 
     case Enum.flat_map(collection, fun) do
       [] -> "[]"
@@ -273,11 +273,11 @@ defimpl Poison.Encoder, for: [Range, Stream, MapSet, HashSet] do
   end
 end
 
-defimpl Poison.Encoder, for: HashDict do
-  alias Poison.Encoder
+defimpl SafePoison.Encoder, for: HashDict do
+  alias SafePoison.Encoder
 
-  use Poison.Pretty
-  use Poison.Encode
+  use SafePoison.Pretty
+  use SafePoison.Encode
 
   def encode(dict, options) do
     if HashDict.size(dict) < 1 do
@@ -311,14 +311,14 @@ defimpl Poison.Encoder, for: HashDict do
 end
 
 if Version.match?(System.version, ">=1.3.0-rc.1") do
-  defimpl Poison.Encoder, for: [Date, Time, NaiveDateTime, DateTime] do
+  defimpl SafePoison.Encoder, for: [Date, Time, NaiveDateTime, DateTime] do
     def encode(value, options) do
-      Poison.Encoder.BitString.encode(@for.to_iso8601(value), options)
+      SafePoison.Encoder.BitString.encode(@for.to_iso8601(value), options)
     end
   end
 end
 
-defimpl Poison.Encoder, for: Any do
+defimpl SafePoison.Encoder, for: Any do
   defmacro __deriving__(module, struct, options) do
     deriving(module, struct, options)
   end
@@ -338,19 +338,19 @@ defimpl Poison.Encoder, for: Any do
     end
 
     quote do
-      defimpl Poison.Encoder, for: unquote(module) do
+      defimpl SafePoison.Encoder, for: unquote(module) do
         def encode(struct, options) do
-          Poison.Encoder.Map.encode(unquote(extractor), options)
+          SafePoison.Encoder.Map.encode(unquote(extractor), options)
         end
       end
     end
   end
 
   def encode(%{__struct__: _} = struct, options) do
-    Poison.Encoder.Map.encode(Map.from_struct(struct), options)
+    SafePoison.Encoder.Map.encode(Map.from_struct(struct), options)
   end
 
   def encode(value, _options) do
-    raise Poison.EncodeError, value: value
+    raise SafePoison.EncodeError, value: value
   end
 end

@@ -1,8 +1,8 @@
-defmodule Poison.ParserTest do
+defmodule SafePoison.ParserTest do
   use ExUnit.Case, async: true
 
-  import Poison.Parser
-  alias Poison.SyntaxError
+  import SafePoison.Parser
+  alias SafePoison.SyntaxError
 
   test "numbers" do
     assert_raise SyntaxError, fn -> parse!("-") end

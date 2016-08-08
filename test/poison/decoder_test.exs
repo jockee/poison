@@ -1,7 +1,7 @@
-defmodule Poison.DecoderTest do
+defmodule SafePoison.DecoderTest do
   use ExUnit.Case, async: true
 
-  import Poison.Decode
+  import SafePoison.Decode
 
   defmodule Person do
     defstruct [:name, :address, :contact, age: 42]
@@ -15,7 +15,7 @@ defmodule Poison.DecoderTest do
     defstruct [:street, :city, :state, :zip]
   end
 
-  defimpl Poison.Decoder, for: Address do
+  defimpl SafePoison.Decoder, for: Address do
     def decode(address, _options) do
       "#{address.street}, #{address.city}, #{address.state}  #{address.zip}"
     end

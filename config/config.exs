@@ -14,7 +14,7 @@ use Mix.Config
 #       level: :info,
 #       format: "$time $metadata[$level] $message\n"
 
-config :poison,
+config :safe_poison,
   native: :erlang.system_info(:hipe_architecture) != :undefined
 
 # It is also possible to import configuration files, relative to this
