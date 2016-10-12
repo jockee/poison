@@ -154,7 +154,7 @@ defimpl SafePoison.Encoder, for: BitString do
     raise SafePoison.EncodeError, value: <<char>>
   end
 
-  defp chunk_size("", _, acc), do: acc
+  defp chunk_size(_, _, acc), do: acc
 
   @compile {:inline, seq: 1}
   defp seq(char) do
